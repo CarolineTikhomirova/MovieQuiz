@@ -29,7 +29,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         let questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         self.questionFactory = questionFactory
-    
+        
         setupUI()
         
         showLoadingIndicator()
@@ -120,6 +120,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                 title: "Этот раунд окончен!",
                 message: message,
                 buttonText: "Сыграть еще раз",
+                accessibilityIdentifier: "Game result",
                 completion: { [weak self] in
                     guard let self = self else {return}
                     self.currentQuestionIndex = 0
@@ -155,6 +156,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             title: "Ошибка",
             message: message,
             buttonText: "Попробовать еще раз",
+            accessibilityIdentifier: "Error alert",
             completion: { [weak self] in
                 guard let self = self else {return}
                 self.currentQuestionIndex = 0
