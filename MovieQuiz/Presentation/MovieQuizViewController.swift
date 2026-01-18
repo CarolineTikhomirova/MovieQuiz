@@ -12,9 +12,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Properties
     private var correctAnswers = 0
-    private var currentQuestionIndex = 0
-    private let questionsAmount = 10
     
+    private let presenter = MovieQuizPresenter()
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var alertPresenter: AlertPresenter?
@@ -41,7 +40,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         guard let question = question else { return }
         
         currentQuestion = question
-        let viewModel = convert(model: question)
+        let viewModel = presenter.convert(model: question)
         
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)}
@@ -65,14 +64,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private func processAnswer(_ givenAnswer: Bool) {
         guard let currentQuestion = currentQuestion else { return }
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-    }
-    
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionStep = QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(),
-            question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-        return questionStep
     }
     
     private func show(quiz step: QuizStepViewModel) {
@@ -103,14 +94,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private func showNextQuestionOrResults() {
         setButtonsEnabled(true)
         
-        if currentQuestionIndex == questionsAmount - 1 {
-            statisticService?.store(correct: correctAnswers, total: questionsAmount)
+        if presenter.isLastQuestion() {
+            statisticService?.store(correct: correctAnswers, total: presenter.questionsAmount)
             guard let statisticService = statisticService else { return }
             
             let bestGame = statisticService.bestGame
             
             let message = """
-                Ваш результат: \(correctAnswers)/\(questionsAmount)
+                Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)
                 Количество сыгранных квизов: \(statisticService.gamesCount)
                 Рекорд: \(bestGame.correct)/\(bestGame.total) (\(bestGame.date.dateTimeString))
                 Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
@@ -123,14 +114,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                 accessibilityIdentifier: "Game result",
                 completion: { [weak self] in
                     guard let self = self else {return}
-                    self.currentQuestionIndex = 0
+                    presenter.resetQuestionIndex()
                     self.correctAnswers = 0
                     self.questionFactory?.requestNextQuestion()
                 })
             alertPresenter?.show(in: self, model: alertModel)
             
         } else {
-            currentQuestionIndex += 1
+            self.presenter.switchToNextQuestion()
             questionFactory?.requestNextQuestion()
         }
     }
@@ -159,7 +150,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             accessibilityIdentifier: "Error alert",
             completion: { [weak self] in
                 guard let self = self else {return}
-                self.currentQuestionIndex = 0
+                self.presenter.resetQuestionIndex()
                 self.correctAnswers = 0
                 
                 self.showLoadingIndicator()
@@ -176,5 +167,4 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     func didFailToLoadData(with error: any Error) {
         showNetworkError(message: error.localizedDescription)
     }
-    
 }
