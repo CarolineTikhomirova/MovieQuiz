@@ -11,6 +11,9 @@ final class MovieQuizPresenter {
     private var currentQuestionIndex = 0
     let questionsAmount = 10
     
+    var currentQuestion: QuizQuestion?
+    weak var viewController: MovieQuizViewController?
+    
     func convert(model: QuizQuestion) -> QuizStepViewModel {
         let questionStep = QuizStepViewModel(
             image: UIImage(data: model.image) ?? UIImage(),
@@ -29,5 +32,14 @@ final class MovieQuizPresenter {
     
     func switchToNextQuestion() {
         currentQuestionIndex += 1
+    }
+    
+    private func yesButtonClicked(_ sender: Any) {
+        processAnswer(true)
+    }
+    
+    func processAnswer(_ givenAnswer: Bool) {
+        guard let currentQuestion = currentQuestion else { return }
+        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
 }
