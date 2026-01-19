@@ -1,6 +1,6 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
     
     // MARK: - Outlets
     @IBOutlet private weak var imageView: UIImageView!
@@ -22,8 +22,6 @@ final class MovieQuizViewController: UIViewController {
         presenter = MovieQuizPresenter(viewController: self)
         
         setupUI()
-        
-        showLoadingIndicator()
     }
     
     // MARK: - Actions
@@ -43,14 +41,19 @@ final class MovieQuizViewController: UIViewController {
     
     func show(quiz step: QuizStepViewModel) {
         imageView.layer.borderWidth = 0
-        setButtonsEnabled(true)
         
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
+        
+        hideLoadingIndicator()
+        
+        setButtonsEnabled(true)
     }
     
     func show(quiz result: QuizResultViewModel) {
+        hideLoadingIndicator()
+        
         let alertModel = AlertModel(
             title: result.title,
             message: result.text,
