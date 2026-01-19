@@ -21,7 +21,7 @@ final class StatisticService {
 }
 
 extension StatisticService: StatisticServiceProtocol {
-
+    
     var gamesCount: Int {
         get {storage.integer(forKey: Keys.gamesCount.rawValue)}
         set {storage.set(newValue, forKey: Keys.gamesCount.rawValue)}
@@ -45,7 +45,7 @@ extension StatisticService: StatisticServiceProtocol {
         get {storage.integer(forKey: Keys.totalCorrectAnswers.rawValue)}
         set {storage.set(newValue, forKey: Keys.totalCorrectAnswers.rawValue)}
     }
-
+    
     private var totalQuestionsAsked: Int {
         get {storage.integer(forKey: Keys.totalQuestionsAsked.rawValue)}
         set {storage.set(newValue, forKey: Keys.totalQuestionsAsked.rawValue)}
